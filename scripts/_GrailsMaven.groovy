@@ -21,7 +21,8 @@ import org.apache.ivy.util.ChecksumHelper
 scriptScope = grails.util.BuildScope.WAR
 scriptEnv = "production"
 
-includeTargets << grailsScript("_GrailsPackage")	
+includeTargets << grailsScript("_GrailsPackage")
+includeTargets << grailsScript("_GrailsEvents")
 
 // Open source licences.
 globalLicenses = [
@@ -210,9 +211,11 @@ target(generatePom: "Generates a pom.xml file for the current project unless './
 
 target(mavenInstall:"Installs a plugin or application into your local Maven cache") {
 	depends(init)
+    event("MavenInstallStart", [])
 	def deployFile = plugin ? new File(pluginZip) : grailsSettings.projectWarFile
 	def ext = plugin ? "zip" : "war"
 	installOrDeploy(deployFile, ext, false)
+    event("MavenInstallEnd", [])
 }
 
 private generateChecksum(File file) {
@@ -263,6 +266,9 @@ private getOptionalProperty(obj, prop) {
 
 target(mavenDeploy:"Deploys the plugin to a Maven repository") {
 	depends(init)
+    
+    event("MavenDeployStart", [])
+    
 	def protocols = [ 	http: "wagon-http",
 						scp:	"wagon-ssh",
 						scpexe:	"wagon-ssh-external",
@@ -304,6 +310,7 @@ target(mavenDeploy:"Deploys the plugin to a Maven repository") {
 	def ext = plugin ? "zip" : "war"	
 	try {
 		installOrDeploy(deployFile, ext, true, [remote:repo, local:distInfo.local])
+        event("MavenDeployEnd", [])
 	}
 	catch(e) {
 		println "Error deploying artifact: ${e.message}"

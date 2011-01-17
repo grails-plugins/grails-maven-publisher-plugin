@@ -38,6 +38,8 @@ where
 target(default: "Publishes a plugin to either a Subversion or Maven repository.") {
     depends(parseArguments, processDefinitions, packagePlugin, generatePom)
 
+    event("PublishPluginStart", [])
+    
     // Use the Grails Central Plugin repository as the default.
     def repoClass = classLoader.loadClass("grails.plugins.publish.Repository")
     def repo = repoClass.grailsCentral
@@ -224,6 +226,9 @@ target(default: "Publishes a plugin to either a Subversion or Maven repository."
             }
         }
     }
+    
+    event("PublishPluginEnd", [])
+    
 }
 
 target(processDefinitions: "Reads the repository definition configuration.") {
